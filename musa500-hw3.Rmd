@@ -9,21 +9,174 @@ editor_options:
   chunk_output_type: inline
 ---
 
+# Homework 3: The Application of Logistic Regression to Examine the Predictors of Car Crashes Caused by Alcohol
+
+## 1 Introduction
+
+## 2 Methodology
+
+## 3 Results
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sf)
+library(janitor)
+#library(ggthemr)
+library(ggpubr)
+library(ggrepel)
+library(purrr)
+library(kableExtra)
+library(caret)
+library(corrplot)
+library(prediction)
+options(scipen = 999) # turn off scientific notation
+library(aod)
+# library(rms)
+library(gmodels)
+library(ROCR)
+library(crosstable)
+library(flextable)
+
+#import data
+library(readr)
+crash_data <- read_csv("Logistic Regression Data.csv")
 ```
+
+
+
+### 3.1 Exploratory Analyses
+
+```{r}
+table_result <- table(factor(crash_data$DRINKING_D, levels = c(0, 1), labels = c("No Alcohol Involved", "Alcohol Involved")))
+
+
+result_df <- as.data.frame(table_result)
+result_df$Proportion <- prop.table(table_result)
+colnames(result_df) <- c("Alcoho-related", "Count", "Proportion")
+
+print(result_df)
+
+```
+
+```{r}
+# install.packages("gmodels")
+library(gmodels)
+
+# List of binary predictor variables
+binary_predictors <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
+
+# Create an empty data frame to store the results
+result_table <- data.frame(
+  Predictor = character(),
+  No_Alcohol_Involved_Number = numeric(),
+  No_Alcohol_Involved_Percentage = numeric(),
+  Alcohol_Involved_Number = numeric(),
+  Alcohol_Involved_Percentage = numeric(),
+  Total = numeric(),
+  stringsAsFactors = FALSE
+)
+
+
+for (predictor in binary_predictors) {
+  # Create the cross-tabulation
+  cross_tab <- CrossTable(crash_data$DRINKING_D, crash_data[[predictor]], prop.t = FALSE, prop.r = FALSE, prop.c = TRUE)
+
+  no_alcohol_involved <- cross_tab$table[1, ]
+  alcohol_involved <- cross_tab$table[2, ]
+  total <- cross_tab$table[3, ]
+
+  no_alcohol_involved_percentage <- no_alcohol_involved / total * 100
+  alcohol_involved_percentage <- alcohol_involved / total * 100
+
+  result_table <- rbind(result_table, c(predictor, no_alcohol_involved, no_alcohol_involved_percentage, alcohol_involved, alcohol_involved_percentage, total))
+}
+
+# Rename the columns
+colnames(result_table) <- c("Predictor", "No_Alcohol_Involved_Number", "No_Alcohol_Involved_Percentage", "Alcohol_Involved_Number", "Alcohol_Involved_Percentage", "Total")
+
+# Print the result table
+print(result_table)
+
+```
+
+```{r}
+variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
+
+create_and_print_table <- function(variable) {
+  crosstable(crash_data, !!as.name(variable), by = "DRINKING_D", funs = "mean", test = TRUE) %>% 
+    as_flextable() 
+}
+
+tables <- map(variables, create_and_print_table)
+tables
+```
+
+```{r}
+  group1 <- crash_data[crash_data$DRINKING_D == 0, ]
+  group2 <- crash_data[crash_data$DRINKING_D == 1, ]
+  mean_group1_var1 <- mean(group1[['PCTBACHMOR']])
+  mean_group1_var2 <- mean(group1[["MEDHHINC"]])
+  mean_group2_var1 <- mean(group2[["PCTBACHMOR"]])
+  mean_group2_var2 <- mean(group2[["MEDHHINC"]])
+
+  t_test_result_var1 <- t.test(group1[["PCTBACHMOR"]], group2[["PCTBACHMOR"]])
+  t_test_result_var2 <- t.test(group1[["MEDHHINC"]], group2[["MEDHHINC"]])
+
+  summary_df <- data.frame(
+    Variable = c("PCTBACHMOR", "MEDHHINC"),
+    Non_drunk_Mean = c(mean_group1_var1, mean_group1_var2),
+    Drunk_Mean = c(mean_group2_var1, mean_group2_var2),
+    P_Value_PCTBACHMOR = t_test_result_var1$p.value,
+    P_Value_MEDHHINC = t_test_result_var2$p.value
+  )
+
+print(summary_df)
+
+
+```
+
+### 3.2 Logistic Regression Assumptions
+
+```{r}
+correlation <- crash_data[c(4:10, 12:13)]
+cor(correlation, method = "pearson")
+```
+
+```{r, warning=FALSE}
+library(corrr)
+
+correlation %>% 
+  correlate() %>% 
+  autoplot() +
+  geom_text(aes(label = round(r, digits=2)), size =3) +
+  labs(title = "COrrelation Matrix")
+```
+
+### 3.3 Logistic Regression Results
+
+```{r}
+logistic <- glm(DRINKING_D ~ FATAL_OR_M + OVERTURNED + CELL_PHONE + SPEEDING + AGGRESSIVE + DRIVER1617 + DRIVER65PLUS + PCTBACHMOR + MEDHHINC, 
+                     data = crash_data, 
+                     family = "binomial")
+
+summary(logistic)
+
+```
+
+## 4 Discussion
+
+## 5 Citation
 
 ## GitHub Documents
 
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
+This is an R Markdown format used for publishing markdown documents to GitHub.
+When you click the **Knit** button all R code chunks are run and a markdown file
+(.md) suitable for publishing to GitHub is generated.
 
 ## Including Code
 
 You can include R code in the document as follows:
-
-```{r cars}
-summary(cars)
-```
 
 ## Including Plots
 
@@ -33,4 +186,5 @@ You can also embed plots, for example:
 plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent
+printing of the R code that generated the plot.
