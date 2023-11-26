@@ -32,11 +32,12 @@ library(corrplot)
 library(prediction)
 options(scipen = 999) # turn off scientific notation
 library(aod)
-# library(rms)
+#library(rms)
 library(gmodels)
 library(ROCR)
 library(crosstable)
 library(flextable)
+library(ggplot2)
 
 #import data
 library(readr)
@@ -55,50 +56,13 @@ result_df <- as.data.frame(table_result)
 result_df$Proportion <- prop.table(table_result)
 colnames(result_df) <- c("Alcoho-related", "Count", "Proportion")
 
-print(result_df)
+#print(result_df)
+kable(result_df)
 
 ```
 
-```{r}
-# install.packages("gmodels")
-library(gmodels)
-
-# List of binary predictor variables
-binary_predictors <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
-
-# Create an empty data frame to store the results
-result_table <- data.frame(
-  Predictor = character(),
-  No_Alcohol_Involved_Number = numeric(),
-  No_Alcohol_Involved_Percentage = numeric(),
-  Alcohol_Involved_Number = numeric(),
-  Alcohol_Involved_Percentage = numeric(),
-  Total = numeric(),
-  stringsAsFactors = FALSE
-)
 
 
-for (predictor in binary_predictors) {
-  # Create the cross-tabulation
-  cross_tab <- CrossTable(crash_data$DRINKING_D, crash_data[[predictor]], prop.t = FALSE, prop.r = FALSE, prop.c = TRUE)
-
-  no_alcohol_involved <- cross_tab$table[1, ]
-  alcohol_involved <- cross_tab$table[2, ]
-  total <- cross_tab$table[3, ]
-
-  no_alcohol_involved_percentage <- no_alcohol_involved / total * 100
-  alcohol_involved_percentage <- alcohol_involved / total * 100
-
-  result_table <- rbind(result_table, c(predictor, no_alcohol_involved, no_alcohol_involved_percentage, alcohol_involved, alcohol_involved_percentage, total))
-}
-
-# Rename the columns
-colnames(result_table) <- c("Predictor", "No_Alcohol_Involved_Number", "No_Alcohol_Involved_Percentage", "Alcohol_Involved_Number", "Alcohol_Involved_Percentage", "Total")
-
-# Print the result table
-print(result_table)
-
-```
 
 ```{r}
 variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
@@ -112,29 +76,51 @@ tables <- map(variables, create_and_print_table)
 tables
 ```
 
+
 ```{r}
-  group1 <- crash_data[crash_data$DRINKING_D == 0, ]
-  group2 <- crash_data[crash_data$DRINKING_D == 1, ]
-  mean_group1_var1 <- mean(group1[['PCTBACHMOR']])
-  mean_group1_var2 <- mean(group1[["MEDHHINC"]])
-  mean_group2_var1 <- mean(group2[["PCTBACHMOR"]])
-  mean_group2_var2 <- mean(group2[["MEDHHINC"]])
+# Assuming your data frame is named 'crash_data' and the dependent variable is named 'DRINKING_D'
+# Replace these variable names with the actual names in your dataset
 
-  t_test_result_var1 <- t.test(group1[["PCTBACHMOR"]], group2[["PCTBACHMOR"]])
-  t_test_result_var2 <- t.test(group1[["MEDHHINC"]], group2[["MEDHHINC"]])
+# Subset the data into two groups
+group1 <- crash_data[crash_data$DRINKING_D == 0, ]
+group2 <- crash_data[crash_data$DRINKING_D == 1, ]
 
-  summary_df <- data.frame(
-    Variable = c("PCTBACHMOR", "MEDHHINC"),
-    Non_drunk_Mean = c(mean_group1_var1, mean_group1_var2),
-    Drunk_Mean = c(mean_group2_var1, mean_group2_var2),
-    P_Value_PCTBACHMOR = t_test_result_var1$p.value,
-    P_Value_MEDHHINC = t_test_result_var2$p.value
-  )
+# Calculate means and standard deviations for both groups and both predictors
+mean_group1_var1 <- mean(group1[['PCTBACHMOR']])
+mean_group1_var2 <- mean(group1[['MEDHHINC']])
+mean_group2_var1 <- mean(group2[['PCTBACHMOR']])
+mean_group2_var2 <- mean(group2[['MEDHHINC']])
+sd_group1_var1 <- sd(group1[['PCTBACHMOR']])
+sd_group1_var2 <- sd(group1[['MEDHHINC']])
+sd_group2_var1 <- sd(group2[['PCTBACHMOR']])
+sd_group2_var2 <- sd(group2[['MEDHHINC']])
 
-print(summary_df)
+# Perform t-tests for both predictors
+t_test_result_var1 <- t.test(group1[['PCTBACHMOR']], group2[['PCTBACHMOR']])
+t_test_result_var2 <- t.test(group1[['MEDHHINC']], group2[['MEDHHINC']])
 
+# Create a summary data frame
+summary_df <- data.frame(
+  Variable = c("PCTBACHMOR", "MEDHHINC"),
+  Non_drunk_Mean = c(mean_group1_var1, mean_group1_var2),
+  Non_drunk_SD = c(sd_group1_var1, sd_group1_var2),
+  Drunk_Mean = c(mean_group2_var1, mean_group2_var2),
+  Drunk_SD = c(sd_group2_var1, sd_group2_var2),
+  P_Value_PCTBACHMOR = t_test_result_var1$p.value,
+  P_Value_MEDHHINC = t_test_result_var2$p.value
+)
+
+# Print the summary table
+#print(summary_df)
+
+kable(summary_df, format = "html", digits = c(2, 2, 2, 2, 4, 4), 
+      caption = "Summary Table of Means, Standard Deviations, and T-Test Results")
 
 ```
+
+
+
+
 
 ### 3.2 Logistic Regression Assumptions
 
@@ -156,35 +142,130 @@ correlation %>%
 ### 3.3 Logistic Regression Results
 
 ```{r}
-logistic <- glm(DRINKING_D ~ FATAL_OR_M + OVERTURNED + CELL_PHONE + SPEEDING + AGGRESSIVE + DRIVER1617 + DRIVER65PLUS + PCTBACHMOR + MEDHHINC, 
-                     data = crash_data, 
-                     family = "binomial")
+logistic <- glm(DRINKING_D ~ FATAL_OR_M + OVERTURNED + CELL_PHONE +
+                        SPEEDING + AGGRESSIVE + DRIVER1617 + DRIVER65PLUS +
+                        PCTBACHMOR + MEDHHINC, family = "binomial", data = crash_data)
 
+# Display summary
 summary(logistic)
 
+```
+
+```{r}
+logitoutput <- summary(logistic)
+logitcoeffs <- logitoutput$coefficients
+logitcoeffs
+```
+```{r}
+or_ci <- exp(cbind(OR = coef(logistic), confint(logistic)))
+
+finallogitoutput <- cbind(logitcoeffs, or_ci)
+finallogitoutput
+```
+
+```{r}
+# Assuming your logistic regression model is named 'logistic' and 'cut_off_values' is a vector of cut-off values
+# Replace these variable names with the actual names in your dataset
+
+# Specify cut-off values
+cut_off_values <- c(0.02, 0.03, 0.05, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.5)
+
+# Initialize a data frame to store results
+result_df <- data.frame(
+  Cut_off_Value = cut_off_values,
+  Sensitivity = numeric(length(cut_off_values)),
+  Specificity = numeric(length(cut_off_values)),
+  Misclassification_Rate = numeric(length(cut_off_values))
+)
+
+# Extract predicted probabilities from the logistic model
+fit <- predict(logistic, type = "response")
+
+# Loop through each cut-off value and calculate metrics
+for (i in seq_along(cut_off_values)) {
+  fit.binary <- as.integer(fit >= cut_off_values[i])
+  table_result <- table(fit.binary, crash_data$DRINKING_D)
+  
+  # Check if both classes are present in the data
+  if (sum(table_result[1, ]) > 0 && sum(table_result[2, ]) > 0) {
+    # Extract metrics from the table_result object
+    sensitivity <- table_result[2, 2] / sum(table_result[2, ])
+    specificity <- table_result[1, 1] / sum(table_result[1, ])
+    misclassification_rate <- sum(table_result[1, 2], table_result[2, 1]) / sum(table_result)
+    
+    # Store results in the data frame
+    result_df[i, c("Sensitivity", "Specificity", "Misclassification_Rate")] <- c(sensitivity, specificity, misclassification_rate)
+  } else {
+    warning(paste("One or both classes missing for cut-off value:", cut_off_values[i]))
+  }
+}
+
+# Print the resulting data frame
+kable(result_df)
+
+
+```
+
+```{r}
+a <- cbind(crash_data$DRINKING_D, fit)
+colnames(a) <- c("labels", "predictions")
+head(a)
+```
+
+```{r}
+roc <- as.data.frame(a)
+pred <- ROCR::prediction(roc$predictions, roc$labels)
+roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
+plot(roc.perf)
+abline(a = 0, b = 1)
+```
+
+```{r}
+opt.cut = function(perf, pred){
+  cut.ind = mapply(FUN=function(x, y, p){
+    d = (x - 0)^2 + (y-1)^2
+    ind = which(d == min(d))
+    c(sensitivity = y[[ind]], specificity = 1-x[[ind]], 
+      cutoff = p[[ind]])
+  }, perf@x.values, perf@y.values, pred@cutoffs)
+}
+
+print(opt.cut(roc.perf, pred))
+```
+```{r}
+auc.perf = performance(pred, measure ="auc")
+auc.perf@y.values
+
+```
+
+**2**
+```{r}
+logistic2 <- glm(DRINKING_D ~ FATAL_OR_M + OVERTURNED + CELL_PHONE +
+                        SPEEDING + AGGRESSIVE + DRIVER1617 + DRIVER65PLUS, family = "binomial", data = crash_data)
+
+# Display summary
+summary(logistic2)
+
+```
+
+```{r}
+logitoutput <- summary(logistic2)
+logitcoeffs <- logitoutput$coefficients
+logitcoeffs
+```
+
+```{r}
+or_ci <- exp(cbind(OR = coef(logistic2), confint(logistic2)))
+
+finallogitoutput <- cbind(logitcoeffs, or_ci)
+finallogitoutput
+```
+
+```{r}
+AIC(logistic, logistic2)
 ```
 
 ## 4 Discussion
 
 ## 5 Citation
 
-## GitHub Documents
-
-This is an R Markdown format used for publishing markdown documents to GitHub.
-When you click the **Knit** button all R code chunks are run and a markdown file
-(.md) suitable for publishing to GitHub is generated.
-
-## Including Code
-
-You can include R code in the document as follows:
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent
-printing of the R code that generated the plot.
