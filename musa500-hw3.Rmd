@@ -157,11 +157,13 @@ calculated as $(R-1)(C-1)$ where $C$ is the number of categories in one of the
 variables and $R$ is the number of categories in the other variable. The
 hypotheses are:
 
--   $H_0$ : the proportion of drinking driver across the variable categories are
-    the same.
+-   $H_0$ : the proportion across the variable categories for crashes that
+    involve drunk drivers is the same as for crashes that don't involve drunk
+    drivers.
 
--   $H_a$ : the proportion of drinking driver across the variable categories are
-    not the same.
+-   $H_a$ : the proportion across the variable categories for crashes that
+    involve drunk drivers is different than for crashes that don't involve drunk
+    drivers.
 
 #### 2.6.2 Comparing Means of Continuous Predictors
 
@@ -180,7 +182,7 @@ hypotheses for the independent samples t-test would be as follows:
 
 ## 3 Results
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sf)
@@ -198,17 +200,17 @@ library(aod)
 #library(rms)
 library(gmodels)
 library(ROCR)
-library(crosstable)
+library(kableExtra)
+#library(crosstable)
 library(flextable)
 library(ggplot2)
-
-#import data
 library(readr)
+library(sjPlot)
 ```
 
 ### 3.1 Exploratory Analyses
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 crash_data <- read_csv("Logistic Regression Data.csv")
 
 table_result <- table(factor(crash_data$DRINKING_D, levels = c(0, 1), labels = c("No Alcohol Involved", "Alcohol Involved")))
@@ -227,12 +229,23 @@ kable(result_df)
 variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
 
 create_and_print_table <- function(variable) {
-  crosstable(crash_data, !!as.name(variable), by = "DRINKING_D", funs = "mean", test = TRUE) %>% 
+  crosstable(crash_data, !!as.name(variable), by = "DRINKING_D", funs = "mean", test = TRUE) 
+  %>% 
     as_flextable() 
 }
 
 tables <- map(variables, create_and_print_table)
 tables
+```
+
+```{r}
+variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
+tab_xtab(var.row = crash_data$FATAL_OR_M, var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
+tab_xtab(var.row = crash_data$FOVERTURNED, var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
+for (var in variables) {
+  tab_xtab(var.row = crash_data[[var]], var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
+
+}
 ```
 
 ```{r}
