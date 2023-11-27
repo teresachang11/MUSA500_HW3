@@ -262,7 +262,10 @@ finallogitoutput
 ```
 
 ```{r}
-AIC(logistic, logistic2)
+AIC(logistic, logistic2) %>%
+  kbl(caption = "AIC") %>%
+  kable_styling() %>%
+  kable_classic(html_font = "Cambria", position = "left", full_width = F)
 ```
 
 ## 4 Discussion
