@@ -2,7 +2,11 @@
 title: "MUSA500 - HW3"
 author: "Chenxi Zhu, Teresa Chang, and Tiffany Luo "
 date: "`r Sys.Date()`"
-output: github_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 editor_options: 
   markdown: 
     wrap: 80
@@ -14,6 +18,162 @@ editor_options:
 ## 1 Introduction
 
 ## 2 Methodology
+
+### 2.3 Hypothesis
+
+Here, we are doing the following hypothesis test for each predictor $X_𝑖$:
+
+-   $𝐻_0: 𝛽_𝑖=0$ The null hypothesis ($𝐻_0$​) is that the predictor $X_i$​ has no
+    effect on the probability of the dependent event occurring.
+
+-   $𝐻_𝑎: 𝛽_𝑖≠0$ The alternative hypothesis ($𝐻_a$​) posits that the predictor
+    $X_i$​​ does have an effect on the probability of the dependent event
+    occurring.
+
+The test statistic used to evaluate these hypotheses is called Wald statistic
+within the context of logistic regression. It is given by the formula
+$W = \hatβ̂_i / \sigma_{\hatβ̂_i}$ and has a normal distribution, where $\hatβ̂_i$
+is the estimated coefficient for the ith predictor and $\sigma_{\hatβ̂_i}$ is the
+variance of the estimated coefficient.
+
+Rather than looking at the estimated 𝛽 coefficients, most statisticians prefer
+to look at odds ratios, which are calculated by exponentiating the coefficients
+$OR_i=e^{\hatβ_​i}$. Therefore, the hypothesis can also be written as
+$𝐻_0: 𝑂𝑅_𝑖=1$ and $𝐻_𝑎:𝑂𝑅_𝑖≠1$.
+
+### 2.4 Assessing the quality of model fit
+
+The quality of the logistic regression model fit is not well described by $R^2$
+as in OLS. $R^2$ in OLS regression is a direct measure of variance explained, in
+logistic regression it is a more abstract concept that requires careful
+interpretation and is often replaced by other measures of model fit.
+
+**Akaike Information Criterion** (AIC) is a measure for comparing the relative
+quality of statistical models for a given dataset, penalizing complexity to
+favor models that achieve a good fit with fewer parameters. A lower AIC
+indicates a model with a better balance between simplicity and fit.
+
+-   **Sensitivity**: The proportion of true positives correctly identified, with
+    higher values indicating better model performance.
+
+-   **Specificity**: The proportion of true negatives correctly identified, with
+    higher values also being preferable.
+
+-   **Misclassification Rate**: The proportion of incorrect predictions, where a
+    lower rate signifies a more accurate model.
+
+The fitted values in logistic regression, $\hat y$ are the predicted
+probabilities that the outcome variable equals one. These probabilities are
+calculated using the logistic function, and a cut-off value is chosen to
+classify these probabilities into binary outcomes. Different cut-offs for the
+probability are considered to balance sensitivity and specificity, which can
+vary depending on the context and the costs associated with false positives and
+false negatives. Adjusting the cut-off can optimize the model for either recall
+or precision, depending on which is more critical for the given application.
+
+The **Receiver Operating Characteristic** (ROC) curve plots the true positive
+rate (sensitivity) against the false positive rate (1-specificity) at various
+threshold settings, providing a visual representation of a classifier's
+performance across all possible cut-offs. A couple different ways for
+identifying the probability cut-offs based on ROC Curves:
+
+-   Youden Index: A cut-off for which (Sensitivity + Specificity) is maximized
+
+-   A cut-off for which the ROC curve has the minimum distance from the upper
+    left corner of the graph -- i.e., the point at which specificity = 1 and
+    sensitivity = 1.
+
+The **Area Under the ROC Curve** (AUC) is a summary measure that represents a
+model's ability to discriminate between positive and negative classes. The AUC
+ranges from 0 to 1, with higher values indicating better model performance. A
+typical classification scheme is:
+
+-   Excellent: AUC \> 0.9
+
+-   Good: AUC between 0.8 and 0.9
+
+-   Fair: AUC between 0.7 and 0.8
+
+-   Poor: AUC between 0.6 and 0.7
+
+-   Fail: AUC \< 0.6
+
+In essence, these metrics provide a comprehensive view of the model's predictive
+accuracy and are essential for both model evaluation and decision-making
+processes.
+
+### 2.5 Assumptions of Logistic Regression
+
+Comparing assumptions with OLS:
+
+**Shared Assumptions:**
+
+-   **Independence of observations:** Both OLS and logistic regression require
+    that observations be independent of one another.
+
+-   **No severe multicollinearity:** Both types of regression assume that
+    predictors are not perfectly collinear; however, logistic regression is
+    generally more tolerant of multicollinearity.
+
+**Distinct Assumptions of Logistic Regression:**
+
+-   **Binary Dependent Variable (DV):** The dependent variable in logistic
+    regression must be binary.
+
+-   **Larger sample Size:** Logistic regression typically requires a larger
+    sample size due to the use of Maximum Likelihood Estimation (MLE) rather
+    than least squares for estimating regression coefficients. A rule of thumb
+    is at least 50 observations per predictor, compared to about 10 per
+    predictor in OLS regression.
+
+**Assumptions Not Required for Logistic Regression:**
+
+-   **Linearity:** There is no requirement for a linear relationship between the
+    DV and the independent variables (IVs). Instead, logistic regression assumes
+    linearity between the log odds of the DV and each IV.
+
+-   **Homoscedasticity and Normality of Residuals:** Unlike OLS, logistic
+    regression does not assume that residuals are normally distributed or that
+    the variance of error terms is constant across all levels of the IVs.
+
+### 2.6 Exploratory Analyses
+
+Before performing logistic regression, statisticians often engage in exploratory
+analyses to investigate the structure and relationships within the data.
+
+#### 2.6.1 Cross-Tabulations & Chi-Square Test
+
+Cross-tabulations are utilized to examine the relationship between the binary
+dependent variable `DRIVING_D` and each binary predictor (`FATAL_OR_M`,
+`OVERTURNED`, `CELL_PHONE`, `SPEEDING`, `AGGRESSIVE`, `DRIVER1617`,
+`DRIVER65PLUS`). The Chi-Square test is the appropriate statistical test for
+assessing the association between two categorical variables. The Chi-Square
+distribution is the sum of squares of $k$ independent standard normal random
+variables, where $k$ is the degrees of freedom. Degrees of freedom can be
+calculated as $(R-1)(C-1)$ where $C$ is the number of categories in one of the
+variables and $R$ is the number of categories in the other variable. The
+hypotheses are:
+
+-   $H_0$ : the proportion of drinking driver across the variable categories are
+    the same.
+
+-   $H_a$ : the proportion of drinking driver across the variable categories are
+    not the same.
+
+#### 2.6.2 Comparing Means of Continuous Predictors
+
+For continuous predictors (`PCTBACHMR`, `MEDHHINC`), we can compare the means
+across the different values of the dependent variable. This is typically done
+using independent samples t-tests. For example, we can see whether the average
+`PCTBACHMOR` values are statistically significantly different for crashes that
+involve drunk drivers and crashes that don't. The null and alternative
+hypotheses for the independent samples t-test would be as follows:
+
+-   $H_0$ : average values of the variable `PCTBACHMOR` are the same for crashes
+    that involve drunk drivers and crashes that don't.
+
+-   $H_a$ : average values of the variable `PCTBACHMOR` are different for
+    crashes that involve drunk drivers and crashes that don't.
 
 ## 3 Results
 
@@ -44,8 +204,6 @@ library(readr)
 crash_data <- read_csv("Logistic Regression Data.csv")
 ```
 
-
-
 ### 3.1 Exploratory Analyses
 
 ```{r}
@@ -61,9 +219,6 @@ kable(result_df)
 
 ```
 
-
-
-
 ```{r}
 variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
 
@@ -75,7 +230,6 @@ create_and_print_table <- function(variable) {
 tables <- map(variables, create_and_print_table)
 tables
 ```
-
 
 ```{r}
 # Assuming your data frame is named 'crash_data' and the dependent variable is named 'DRINKING_D'
@@ -118,10 +272,6 @@ kable(summary_df, format = "html", digits = c(2, 2, 2, 2, 4, 4),
 
 ```
 
-
-
-
-
 ### 3.2 Logistic Regression Assumptions
 
 ```{r}
@@ -156,6 +306,7 @@ logitoutput <- summary(logistic)
 logitcoeffs <- logitoutput$coefficients
 logitcoeffs
 ```
+
 ```{r}
 or_ci <- exp(cbind(OR = coef(logistic), confint(logistic)))
 
@@ -232,6 +383,7 @@ opt.cut = function(perf, pred){
 
 print(opt.cut(roc.perf, pred))
 ```
+
 ```{r}
 auc.perf = performance(pred, measure ="auc")
 auc.perf@y.values
@@ -239,6 +391,7 @@ auc.perf@y.values
 ```
 
 **2**
+
 ```{r}
 logistic2 <- glm(DRINKING_D ~ FATAL_OR_M + OVERTURNED + CELL_PHONE +
                         SPEEDING + AGGRESSIVE + DRIVER1617 + DRIVER65PLUS, family = "binomial", data = crash_data)
@@ -271,4 +424,3 @@ AIC(logistic, logistic2) %>%
 ## 4 Discussion
 
 ## 5 Citation
-
