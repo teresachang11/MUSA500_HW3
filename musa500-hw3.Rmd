@@ -221,7 +221,11 @@ result_df$Proportion <- prop.table(table_result)
 colnames(result_df) <- c("Alcoho-related", "Count", "Proportion")
 
 #print(result_df)
-kable(result_df)
+#kable(result_df)
+result_df %>%
+  kbl() %>%
+    kable_styling() %>%
+    kable_classic(html_font = "Cambria", position = "left", full_width = F)
 
 ```
 
@@ -240,8 +244,6 @@ tables
 
 ```{r}
 variables <- c("FATAL_OR_M", "OVERTURNED", "CELL_PHONE", "SPEEDING", "AGGRESSIVE", "DRIVER1617", "DRIVER65PLUS")
-tab_xtab(var.row = crash_data$FATAL_OR_M, var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
-tab_xtab(var.row = crash_data$FOVERTURNED, var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
 for (var in variables) {
   tab_xtab(var.row = crash_data[[var]], var.col = crash_data$DRINKING_D, show.row.prc = TRUE)
 
@@ -284,9 +286,10 @@ summary_df <- data.frame(
 # Print the summary table
 #print(summary_df)
 
-kable(summary_df, format = "html", digits = c(2, 2, 2, 2, 4, 4), 
-      caption = "Summary Table of Means, Standard Deviations, and T-Test Results")
-
+summary_df %>%
+  kbl(caption = "Summary Table of Means, Standard Deviations, and T-Test Results") %>%
+    kable_styling() %>%
+    kable_classic(html_font = "Cambria", position = "left", full_width = F)
 ```
 
 ### 3.2 Logistic Regression Assumptions
@@ -369,9 +372,12 @@ for (i in seq_along(cut_off_values)) {
 }
 
 # Print the resulting data frame
-kable(result_df)
+# kable(result_df)
 
-
+result_df %>%
+  kbl(caption = "Summary Table of Means, Standard Deviations, and T-Test Results") %>%
+    kable_styling() %>%
+    kable_classic(html_font = "Cambria", position = "left", full_width = F)
 ```
 
 ```{r}
