@@ -1,0 +1,2 @@
+"0","correlation <- crash_data[c(4:10, 12:13)]"
+"0","#cor(correlation, method = ""pearson"")"

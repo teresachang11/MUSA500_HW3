@@ -1,0 +1,2 @@
+"0","logitoutput <- summary(logistic)"
+"0","logitcoeffs <- logitoutput$coefficients"
