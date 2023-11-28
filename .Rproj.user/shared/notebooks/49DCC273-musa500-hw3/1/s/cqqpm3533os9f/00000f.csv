@@ -1,0 +1,4 @@
+"0","AIC(logistic, logistic2) %>%"
+"0","  kbl(caption = ""AIC"") %>%"
+"0","  kable_styling() %>%"
+"0","  kable_classic(html_font = ""Cambria"", position = ""left"", full_width = F)"

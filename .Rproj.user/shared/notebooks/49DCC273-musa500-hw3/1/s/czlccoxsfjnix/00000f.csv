@@ -1,0 +1,11 @@
+"0","variables <- c(""FATAL_OR_M"", ""OVERTURNED"", ""CELL_PHONE"", ""SPEEDING"", ""AGGRESSIVE"", ""DRIVER1617"", ""DRIVER65PLUS"")"
+"0",""
+"0","create_and_print_table <- function(variable) {"
+"0","  crosstable(crash_data, !!as.name(variable), by = ""DRINKING_D"", funs = ""mean"", test = TRUE) %>% "
+"0","    as_flextable() "
+"0","}"
+"0",""
+"0","tables <- map(variables, create_and_print_table)"
+"0","tables"
+"1","[[1]]
+"

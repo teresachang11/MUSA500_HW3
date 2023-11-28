@@ -1,0 +1,4 @@
+"0","roc <- as.data.frame(a)"
+"0","pred <- ROCR::prediction(roc$predictions, roc$labels)"
+"0","roc.perf = performance(pred, measure = ""tpr"", x.measure = ""fpr"")"
+"0","plot(roc.perf)"
