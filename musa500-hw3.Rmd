@@ -759,20 +759,15 @@ Variance Inflation Factors (VIF), could provide a more detailed assessment.
 
 ## 5 Citation
 
-Jonathan J. Rolison, Shirley Regev, Salissou Moutari, Aidan Feeney,
-
-What are the factors that contribute to road accidents? An assessment of law
-enforcement views, ordinary drivers\' opinions, and road accident records,
-
-Accident Analysis & Prevention, Volume 115, 2018, Pages 11-24,ISSN 0001-4575,
-
+Jonathan J. Rolison, Shirley Regev, Salissou Moutari, Aidan Feeney, What are the
+factors that contribute to road accidents? An assessment of law enforcement
+views, ordinary drivers\' opinions, and road accident records, Accident Analysis
+& Prevention, Volume 115, 2018, Pages 11-24,ISSN 0001-4575,
 <https://doi.org/10.1016/j.aap.2018.02.025>.
 
-Keli A. Braitman, Bevan B. Kirley, Anne T. McCartt, Neil K. Chaudhary,
-
-Crashes of novice teenage drivers: Characteristics and contributing factors,
-
-Journal of Safety Research,Volume 39, Issue 1,2008, Pages 47-54, ISSN 0022-4375,
+Keli A. Braitman, Bevan B. Kirley, Anne T. McCartt, Neil K. Chaudhary, Crashes
+of novice teenage drivers: Characteristics and contributing factors, Journal of
+Safety Research,Volume 39, Issue 1,2008, Pages 47-54, ISSN 0022-4375,
 <https://doi.org/10.1016/j.jsr.2007.12.002.>
 
 Older adult driver safety. (2022, June 28). Centers for Disease Control and
